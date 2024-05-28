@@ -1,15 +1,14 @@
 cmake_minimum_required(VERSION 3.22)
-project(AsyncServer)
+project(ReadAtLeastServer)
 
 set(CMAKE_CXX_STANDARD 11)
 
 find_package(Boost REQUIRED COMPONENTS system)
 
-add_executable(AsyncServer main.cpp
+add_executable(ReadAtLeastServer ReadAtLeastServer.cpp
         CServer.cpp
         CServer.h
         CSession.cpp
-        CSession.h
-        MsgNode.h)
+        CSession.h)
 
-target_link_libraries(AsyncServer PRIVATE ${Boost_LIBRARIES})
+target_link_libraries(ReadAtLeastServer PRIVATE ${Boost_LIBRARIES})
