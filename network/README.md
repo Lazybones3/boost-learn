@@ -9,3 +9,4 @@
 - 处理大小端字节序：AsyncServer04、SyncClient04
 - Protobuf序列化：ProtobufServer、ProtobufClient
 - Json序列化：JsonServer、JsonClient
+- tlv消息格式：MsgIdServer、MsgIdClient
