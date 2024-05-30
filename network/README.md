@@ -14,3 +14,4 @@
 - Asio方式优雅退出：LogicServer02、MsgIdClient
 - IOServicePool多线程模型：IOContextPoolServer、IOContextPoolClient
 - IOThreadPool多线程模型：ThreadPoolServer、IOContextPoolClient
+- 改进的IOThreadPool多线程模型：StrandPoolServer、IOContextPoolClient
