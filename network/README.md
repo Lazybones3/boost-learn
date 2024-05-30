@@ -13,3 +13,4 @@
 - 逻辑处理服务（单例类、条件变量、消息回调函数）：LogicServer01、MsgIdClient
 - Asio方式优雅退出：LogicServer02、MsgIdClient
 - IOServicePool多线程模型：IOContextPoolServer、IOContextPoolClient
+- IOThreadPool多线程模型：ThreadPoolServer、IOContextPoolClient
