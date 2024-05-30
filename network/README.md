@@ -10,3 +10,5 @@
 - Protobuf序列化：ProtobufServer、ProtobufClient
 - Json序列化：JsonServer、JsonClient
 - tlv消息格式：MsgIdServer、MsgIdClient
+- 逻辑处理服务（单例类、条件变量、消息回调函数）：LogicServer01、MsgIdClient
+- Asio方式优雅退出：LogicServer02、MsgIdClient
