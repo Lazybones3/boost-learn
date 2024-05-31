@@ -113,6 +113,8 @@ void change_param(int& param) {
 
 void ref_oops(int some_param) {
     std::cout << "before change , param is " << some_param << std::endl;
+ // 编译错误
+ // std::thread t2(change_param, some_param);
 	//需使用引用显示转换
 	std::thread  t2(change_param, std::ref(some_param));
 	t2.join();
