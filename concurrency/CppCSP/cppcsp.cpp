@@ -57,7 +57,7 @@ public:
 
 // 示例使用
 int main() {
-	Channel<int> ch(10);  // 无缓冲的channel
+	Channel<int> ch(10);  // 10缓冲的channel
 
 	std::thread producer([&]() {
 		for (int i = 0; i < 5; ++i) {
