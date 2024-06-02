@@ -8,8 +8,8 @@
 - 条件变量：ConditionVariable
 - 并发三剑客future、promise和async：FutureAndPromise
 - 函数式编程和并行计算：AsyncFunction
-- Actor设计模式：Actor
 - CSP设计模式：cspdemo、CppCSP
+- Actor设计模式：Actor
 - 问题总结：QASummary
 - 内存模型：MemoryModel
 - 用内存顺序实现内存模型：AcquireRelease
