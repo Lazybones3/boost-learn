@@ -27,18 +27,20 @@ public:
         stop();
     }
 
+    // 提交任务，F是回调函数，Args是可变参数
     template <class F, class... Args>
     auto commit(F&& f, Args&&... args) -> std::future<decltype(f(args...))> {
         using RetType = decltype(f(args...));
         if (stop_.load())
             return std::future<RetType>{};
-
+        // 将原本有参的函数bind形成一个无参函数
         auto task = std::make_shared<std::packaged_task<RetType()>>(
             std::bind(std::forward<F>(f), std::forward<Args>(args)...));
 
         std::future<RetType> ret = task->get_future();
         {
             std::lock_guard<std::mutex> cv_mt(cv_mt_);
+            // (*task)()就是执行上面bind后的无参函数
             tasks_.emplace([task] { (*task)(); });
         }
         cv_lock_.notify_one();
