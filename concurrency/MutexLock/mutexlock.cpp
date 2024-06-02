@@ -15,7 +15,43 @@ void use_lock() {
 		mtx1.unlock();
 		std::this_thread::sleep_for(std::chrono::microseconds(10));
     }
+}
 
+void test_lock1() {
+	std::thread t1(use_lock);
+
+	std::thread t2([]() {
+		while (true) {
+			mtx1.lock();
+			shared_data--;
+			std::cout << "current thread is " << std::this_thread::get_id() << std::endl;
+			std::cout << "sharad data is " << shared_data << std::endl;
+			mtx1.unlock();
+			std::this_thread::sleep_for(std::chrono::microseconds(10));
+		}
+		});
+
+	t1.join();
+	t2.join();
+}
+
+void test_lock2() {
+	std::thread t1(use_lock);
+
+	std::thread t2([]() {
+		while (true) {
+			{
+				std::lock_guard<std::mutex> lk_guard(mtx1);
+				shared_data--;
+				std::cout << "current thread is " << std::this_thread::get_id() << std::endl;
+				std::cout << "sharad data is " << shared_data << std::endl;
+			}
+			std::this_thread::sleep_for(std::chrono::microseconds(10));
+		}
+		});
+
+	t1.join();
+	t2.join();
 }
 
 template<typename T>
@@ -23,6 +59,7 @@ class threadsafe_stack1
 {
 private:
 	std::stack<T> data;
+	// mutable表示可以修改const函数中的成员变量
 	mutable std::mutex m;
 public:
 	threadsafe_stack1() {}
@@ -91,28 +128,35 @@ private:
 	mutable std::mutex m;
 public:
 	threadsafe_stack() {}
+
 	threadsafe_stack(const threadsafe_stack& other)
 	{
 		std::lock_guard<std::mutex> lock(other.m);
 		//①在构造函数的函数体（constructor body）内进行复制操作
 		data = other.data;   
 	}
+
 	threadsafe_stack& operator=(const threadsafe_stack&) = delete;
+	
 	void push(T new_value)
 	{
 		std::lock_guard<std::mutex> lock(m);
 		data.push(std::move(new_value));
 	}
+
+	// 通过智能指针减少直接返回T造成的拷贝开销
 	std::shared_ptr<T> pop()
 	{
 		std::lock_guard<std::mutex> lock(m);
 		//②试图弹出前检查是否为空栈
 		if (data.empty()) throw empty_stack();
 		//③改动栈容器前设置返回值
-			std::shared_ptr<T> const res(std::make_shared<T>(data.top()));    
-			data.pop();
+		std::shared_ptr<T> const res(std::make_shared<T>(data.top()));    
+		data.pop();
 		return res;
 	}
+
+	// 通过引用减少直接返回T造成的拷贝开销
 	void pop(T& value)
 	{
 		std::lock_guard<std::mutex> lock(m);
@@ -120,6 +164,7 @@ public:
 		value = data.top();
 		data.pop();
 	}
+
 	bool empty() const
 	{
 		std::lock_guard<std::mutex> lock(m);
@@ -127,23 +172,6 @@ public:
 	}
 };
 
-void test_lock() {
-	std::thread t1(use_lock);
-
-	std::thread t2([]() {
-		while (true) {
-			mtx1.lock();
-			shared_data--;
-			std::cout << "current thread is " << std::this_thread::get_id() << std::endl;
-			std::cout << "sharad data is " << shared_data << std::endl;
-			mtx1.unlock();
-			std::this_thread::sleep_for(std::chrono::microseconds(10));
-		}
-		});
-
-	t1.join();
-	t2.join();
-}
 
 std::mutex  t_lock1;
 std::mutex  t_lock2;
@@ -160,7 +188,7 @@ void dead_lock1() {
 		t_lock2.unlock();
 		t_lock1.unlock();
 		std::this_thread::sleep_for(std::chrono::milliseconds(5));
-		std::cout << "dead_lock2 end " << std::endl;
+		std::cout << "dead_lock1 end " << std::endl;
 	}
 }
 
@@ -176,6 +204,13 @@ void dead_lock2() {
 		std::this_thread::sleep_for(std::chrono::milliseconds(5));
 		std::cout << "dead_lock2 end " << std::endl;
 	}
+}
+
+void test_dead_lock() {
+	std::thread t1(dead_lock1);
+	std::thread t2(dead_lock2);
+	t1.join();
+	t2.join();
 }
 
 //加锁和解锁作为原子操作解耦合，各自只管理自己的功能
@@ -211,13 +246,6 @@ void safe_lock2() {
 	}
 }
 
-void test_dead_lock() {
-	std::thread t1(dead_lock1);
-	std::thread t2(dead_lock2);
-	t1.join();
-	t2.join();
-}
-
 void test_safe_lock() {
 	std::thread t1(safe_lock1);
 	std::thread t2(safe_lock2);
@@ -245,12 +273,18 @@ public:
 		return os;
 	}
 
-	//重载赋值运算符
+	// 重载拷贝赋值运算符，系统默认不提供拷贝赋值
 	som_big_object& operator = (const som_big_object& b2) {
 		if (this == &b2) {
 			return *this;
 		}
 		_data = b2._data;
+		return *this;
+	}
+
+	// 重载移动赋值运算符，系统默认不提供移动赋值
+	som_big_object& operator = (const som_big_object&& b2) {
+		_data = std::move(b2._data);
 		return *this;
 	}
 
@@ -326,20 +360,6 @@ void safe_swap(big_object_mgr& objm1, big_object_mgr& objm2) {
 	std::cout << "thread [ " << std::this_thread::get_id() << " ] end" << std::endl;
 }
 
-//上述代码可以简化为以下方式
-void safe_swap_scope(big_object_mgr& objm1, big_object_mgr& objm2) {
-	std::cout << "thread [ " << std::this_thread::get_id() << " ] begin" << std::endl;
-	if (&objm1 == &objm2) {
-		return;
-	}
-
-	std::scoped_lock  guard(objm1._mtx, objm2._mtx);
-	//等价于
-	//std::scoped_lock<std::mutex, std::mutex> guard(objm1._mtx, objm2._mtx);
-	swap(objm1._obj, objm2._obj);
-	std::cout << "thread [ " << std::this_thread::get_id() << " ] end" << std::endl;
-}
-
 void test_safe_swap() {
 	big_object_mgr objm1(5);
 	big_object_mgr objm2(100);
@@ -353,6 +373,34 @@ void test_safe_swap() {
 	objm2.printinfo();
 }
 
+//C++17上述代码可以简化为以下方式
+void safe_swap_scope(big_object_mgr& objm1, big_object_mgr& objm2) {
+	std::cout << "thread [ " << std::this_thread::get_id() << " ] begin" << std::endl;
+	if (&objm1 == &objm2) {
+		return;
+	}
+
+	std::scoped_lock  guard(objm1._mtx, objm2._mtx);
+	//等价于
+	//std::scoped_lock<std::mutex, std::mutex> guard(objm1._mtx, objm2._mtx);
+	swap(objm1._obj, objm2._obj);
+	std::cout << "thread [ " << std::this_thread::get_id() << " ] end" << std::endl;
+}
+
+void test_safe_swap_scope() {
+	big_object_mgr objm1(5);
+	big_object_mgr objm2(100);
+
+	std::thread t1(safe_swap_scope, std::ref(objm1), std::ref(objm2));
+	std::thread t2(safe_swap_scope, std::ref(objm2), std::ref(objm1));
+	t1.join();
+	t2.join();
+
+	objm1.printinfo();
+	objm2.printinfo();
+}
+
+
 //对于现实开发中，我们很难保证嵌套加锁，所以尽可能将互斥操作封装为原子操作，尽量不要在一个函数里嵌套用两个锁。
 //对于嵌套用锁，也可以采用权重的方式限制使用顺序。
 
@@ -363,6 +411,7 @@ public:
 		_previous_hierarchy_value(0) {}
 	hierarchical_mutex(const hierarchical_mutex&) = delete;
 	hierarchical_mutex& operator=(const hierarchical_mutex&) = delete;
+
 	void lock() {
 		check_for_hierarchy_violation();
 		_internal_mutex.lock();
@@ -397,6 +446,7 @@ private:
 	static thread_local  unsigned long  _this_thread_hierarchy_value;
 
 	void check_for_hierarchy_violation() {
+		// 如果要加的锁的层级比当前锁的层级大，就抛出异常
 		if (_this_thread_hierarchy_value <= _hierarchy_value) {
 			throw  std::logic_error("mutex  hierarchy violated");
 		}
@@ -434,9 +484,24 @@ void test_hierarchy_lock() {
 
 int main()
 {
-	//test_lock();
+	// 使用lock和unlock实现加锁
+	//test_lock1();
+	// 使用lock_guard实现加锁
+	//test_lock2();
+	// 程序崩溃
 	//test_threadsafe_stack1();
-    std::cout << "Hello World!\n";
+	// 死锁
+	//test_dead_lock();
+	// 将lock1和lock2分别封装成函数来防止死锁
+	//test_safe_lock();
+	// 死锁
+    //test_danger_swap();
+	// 使用std::adopt_lock同时加锁来防止死锁
+	//test_safe_swap();
+	// C++17使用std::scoped_lock同时加锁
+	//test_safe_swap_scope();
+	// 使用层级锁检测死锁
+	test_hierarchy_lock();
 }
 
 
