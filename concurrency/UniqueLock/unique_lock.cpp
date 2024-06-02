@@ -7,7 +7,7 @@
 std::mutex mtx;
 int shared_data = 0;
 void use_unique() {
-	//lock可自动解锁，也可手动解锁
+	//unique_lock可自动解锁，也可手动解锁
 	std::unique_lock<std::mutex> lock(mtx);
 	std::cout << "lock success" << std::endl;
 	shared_data++;
@@ -16,9 +16,9 @@ void use_unique() {
 
 //可判断是否占有锁
 void owns_lock() {
-	//lock可自动解锁，也可手动解锁
 	std::unique_lock<std::mutex> lock(mtx);
 	shared_data++;
+	// 判断是否锁是否被占用
 	if (lock.owns_lock()) {
 		std::cout << "owns lock" << std::endl;
 	}
@@ -135,6 +135,8 @@ void safe_swap2() {
 std::unique_lock <std::mutex>  get_lock() {
 	std::unique_lock<std::mutex>  lock(mtx);
 	shared_data++;
+	// unique_lock没有拷贝构造和拷贝赋值，所以return时只能使用移动构造
+	// 从而调用get_lock()生成一个右值，这就实现了加锁权限的转移
 	return lock;
 }
 
@@ -146,7 +148,6 @@ void use_return() {
 //锁粒度表示加锁的精细程度。
 //一个锁的粒度要足够大，以保证可以锁住要访问的共享数据。
 //一个锁的粒度要足够小，以保证非共享的数据不被锁住影响性能。
-
 void precision_lock() {
 	std::unique_lock<std::mutex> lock(mtx);
 	shared_data++;
