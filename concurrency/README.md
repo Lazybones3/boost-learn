@@ -7,7 +7,7 @@
 - 单例模式：Singleton
 - 条件变量：ConditionVariable
 - 并发三剑客future、promise和async：FutureAndPromise
-- 函数式编程：AsyncFunction
+- 函数式编程和并行计算：AsyncFunction
 - Actor设计模式：Actor
 - CSP设计模式：GoCSP、CppCSP
 - 问题总结：QASummary
