@@ -4,6 +4,8 @@
 #include <functional>
 #include <future>
 
+// 当函数返回一个类类型的局部变量时会先调用移动构造，如果没有移动构造再调用拷贝构造。
+// 在 C++11 之后，编译器会默认使用移动语义（move semantics）来提高性能
 class TestCopy {
 public:
 	TestCopy() {}
