@@ -23,6 +23,7 @@ TestCopy TestCp() {
 }
 
 
+// 优先按照移动构造的方式返回局部的类对象，有一个好处就是可以返回一些只支持移动构造的类型
 std::unique_ptr<int> ReturnUniquePtr() {
 	std::unique_ptr<int>  uq_ptr = std::make_unique<int>(100);
 	return  uq_ptr;
@@ -42,6 +43,16 @@ std::thread ReturnThread() {
 		});
 
 	return t;
+}
+
+void TestReturnUniquePtr() {
+	auto rt_ptr = ReturnUniquePtr();
+	std::cout << "rt_ptr value is " << *rt_ptr << std::endl;
+}
+
+void TestThread() {
+	std::thread rt_thread = ReturnThread();
+	rt_thread.join();
 }
 
 void ChangeValue() {
@@ -186,10 +197,8 @@ void TestParallen2() {
 int main()
 {
 	//TestCp();
-	//auto rt_ptr = ReturnUniquePtr();
-	//std::cout << "rt_ptr value is " << *rt_ptr << std::endl;
-	//std::thread rt_thread = ReturnThread();
-	//rt_thread.join();
+	//TestReturnUniquePtr();
+	//TestThread();
 	//ThreadOp();
 	//BlockAsync();
 
