@@ -4,6 +4,12 @@
 #include <mutex>
 #include <memory>
 
+// bool std::atomic<T>::compare_exchange_weak(T &expected, T desired);
+// bool std::atomic<T>::compare_exchange_strong(T &expected, T desired);
+/**
+compare_exchange_strong会比较原子变量atomic<T>和expected的值是否相等，如果相等则将atomic<T>的值换为desired并返回true，否则将atomic<T>换为expected的值，并且返回false；
+compare_exchange_weak不能保证atomic<T>的值和expected的值相等时也会做交换，很可能相等也会返回false，但是性能更高，所以要多次循环使用。
+*/
 template<typename T, size_t Cap>
 class CircularQueSeq :private std::allocator<T> {
 public:
