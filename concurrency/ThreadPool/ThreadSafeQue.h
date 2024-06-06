@@ -176,6 +176,7 @@ public:
 	bool try_steal(T& value) {
 		std::unique_lock<std::mutex> tail_lock(tail_mutex,std::defer_lock);
 		std::unique_lock<std::mutex>  head_lock(head_mutex, std::defer_lock);
+		// 当队列长度为3时，同时操作头和尾会操作同一个节点，所以都要加锁
 		std::lock(tail_lock, head_lock);
 		if (head.get() == tail)
 		{
