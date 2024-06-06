@@ -5,6 +5,7 @@
 #include "join_thread.h"
 #include "FutureThreadPool.h"
 
+// 任务窃取
 class steal_thread_pool
 {
 private:
@@ -25,7 +26,7 @@ private:
 				if (i == index) {
 					continue;
 				}
-
+				/// 下标不等于自己，就从其他队列偷数据
 				steal_res  = thread_work_ques[i].try_steal(wrapper);
 				if (steal_res) {
 					wrapper();
@@ -37,7 +38,7 @@ private:
 			if (steal_res) {
 				continue;
 			}
-			
+			// 所有队列都没有数据，就交出CPU资源
 			std::this_thread::yield();
 		}
 	}
