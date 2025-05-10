@@ -3,6 +3,7 @@
 #include "ThreadSafeQue.h"
 #include "join_thread.h"
 
+// 轮询方式的线程池
 class simple_thread_pool
 {
     std::atomic_bool done;

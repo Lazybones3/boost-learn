@@ -5,6 +5,7 @@
 #include "join_thread.h"
 #include "FutureThreadPool.h"
 
+// 每个线程使用一个队列来避免争夺
 class parrallen_thread_pool
 {
 private:

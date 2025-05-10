@@ -94,6 +94,7 @@ void write_x_then_y_fence()
 void read_y_then_x_fence()
 {
     while (!y.load(std::memory_order_relaxed));  //4
+    // 栅栏机制atomic_thread_fence保证了4先于5写入内存，5先于6写入内存
 	std::atomic_thread_fence(std::memory_order_acquire); //5
 	if (x.load(std::memory_order_relaxed))  //6
 		++z;

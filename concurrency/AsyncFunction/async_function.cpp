@@ -48,8 +48,8 @@ std::list<T> sequential_quick_sort(std::list<T> input)
 	//  ③std::partition 是一个标准库函数，用于将容器或数组中的元素按照指定的条件进行分区，
 	// 使得满足条件的元素排在不满足条件的元素之前。
 	// 所以经过计算divide_point指向的是input中第一个大于等于pivot的元素
-		auto divide_point = std::partition(input.begin(), input.end(),
-			[&](T const& t) {return t < pivot; });    
+	auto divide_point = std::partition(input.begin(), input.end(),
+		[&](T const& t) {return t < pivot; });    
 	
 	// ④ 我们将小于pivot的元素放入lower_part中
 	std::list<T> lower_part;
@@ -172,7 +172,9 @@ void test_thread_pool_sort() {
 int main()
 {
 	//test_quick_sort();
+	// 函数式编程
 	//test_sequential_quick();
+	// 并行计算
 	//test_parallen_sort();
 	test_thread_pool_sort();
 }

@@ -4,6 +4,8 @@
 #include <functional>
 #include <future>
 
+// 当函数返回一个类类型的局部变量时会先调用移动构造，如果没有移动构造再调用拷贝构造。
+// 在 C++11 之后，编译器会默认使用移动语义（move semantics）来提高性能
 class TestCopy {
 public:
 	TestCopy() {}
@@ -21,6 +23,7 @@ TestCopy TestCp() {
 }
 
 
+// 优先按照移动构造的方式返回局部的类对象，有一个好处就是可以返回一些只支持移动构造的类型
 std::unique_ptr<int> ReturnUniquePtr() {
 	std::unique_ptr<int>  uq_ptr = std::make_unique<int>(100);
 	return  uq_ptr;
@@ -40,6 +43,16 @@ std::thread ReturnThread() {
 		});
 
 	return t;
+}
+
+void TestReturnUniquePtr() {
+	auto rt_ptr = ReturnUniquePtr();
+	std::cout << "rt_ptr value is " << *rt_ptr << std::endl;
+}
+
+void TestThread() {
+	std::thread rt_thread = ReturnThread();
+	rt_thread.join();
 }
 
 void ChangeValue() {
@@ -184,10 +197,8 @@ void TestParallen2() {
 int main()
 {
 	//TestCp();
-	//auto rt_ptr = ReturnUniquePtr();
-	//std::cout << "rt_ptr value is " << *rt_ptr << std::endl;
-	//std::thread rt_thread = ReturnThread();
-	//rt_thread.join();
+	//TestReturnUniquePtr();
+	//TestThread();
 	//ThreadOp();
 	//BlockAsync();
 

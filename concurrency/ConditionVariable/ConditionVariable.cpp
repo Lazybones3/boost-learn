@@ -99,11 +99,13 @@ class threadsafe_queue
 {
 private:
 	mutable std::mutex mut;    
-		std::queue<T> data_queue;
+	std::queue<T> data_queue;
 	std::condition_variable data_cond;
 public:
 	threadsafe_queue()
 	{}
+
+	// 这里使用const的两个好处：一是可以接受常量类型的变量，二是在执行std::move时没有实现移动构造会调用这里的拷贝构造
 	threadsafe_queue(threadsafe_queue const& other)
 	{
 		std::lock_guard<std::mutex> lk(other.mut);
@@ -212,8 +214,11 @@ void test_safe_que() {
 
 int main()
 {
+	// 两个线程交替打印1和2不好的实现
 	//PoorImplemention();
+	// 两个线程交替打印1和2合理的实现
 	//ResonableImplemention();
+	// 线程安全的队列
 	test_safe_que();
 	return 1;
 }

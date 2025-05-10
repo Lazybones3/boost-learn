@@ -13,6 +13,8 @@ std::string fetchDataFromDB(std::string query) {
 
 void use_async() {
 	// 使用 std::async 异步调用 fetchDataFromDB
+	// std::launch::async表示任务马上异步开始执行
+	// std::launch::deferred表示任务将在调用std::future::get()时才执行
 	std::future<std::string> resultFromDB = std::async(std::launch::async, fetchDataFromDB, "Data");
 
 	// 在主线程中做其他事情
@@ -65,6 +67,7 @@ void threadFunction(std::shared_future<int> future) {
 
 void use_shared_future() {
 	std::promise<int> promise;
+	// std::future隐式转换为std::shared_future，底层使用的是移动构造
 	std::shared_future<int> future = promise.get_future();
 
 	std::thread myThread1(myFunction, std::move(promise)); // 将 promise 移动到线程中
@@ -89,7 +92,7 @@ void use_shared_future_error() {
 	// 使用 share() 方法获取新的 shared_future 对象  
 	
 	std::thread myThread2(threadFunction, std::move(future));
-
+	// 第二次move时future已经失效了
 	std::thread myThread3(threadFunction, std::move(future));
 
 	myThread1.join();
@@ -186,6 +189,37 @@ void use_future_exception() {
 
 }
 
+void use_threadpool_1() {
+	auto &m1 = ThreadPool::instance();
+	auto &j = ThreadPool::instance();
+	std::cout << "m is " << &m1 << std::endl;
+	std::cout << "j is " << &j << std::endl;
+}
+
+void use_threadpool_2() {
+	int m = 0;
+	ThreadPool::instance().commit([](int& m) {
+		m = 1024;
+		std::cout << "inner set m is " << m << std::endl;
+		std::cout << "m address is " << &m << std::endl;
+		}, m);
+
+	std::this_thread::sleep_for(std::chrono::seconds(3));
+	std::cout << "m is " << m << std::endl;
+	std::cout << "m address is " << &m << std::endl;
+}
+
+void use_threadpool_3() {
+	int m = 0;
+
+	ThreadPool::instance().commit([](int& m) {
+		m = 1024;
+		std::cout << "inner set m is " << m << std::endl;
+		}, std::ref(m));
+	std::this_thread::sleep_for(std::chrono::seconds(3));
+	std::cout << "m is " << m << std::endl;
+}
+
 int main()
 {
 	//use_async();
@@ -196,27 +230,12 @@ int main()
 	//use_promise_exception();
 	//use_promise_destruct();
 	//use_future_exception();
-	auto &m1 = ThreadPool::instance();
-	auto &j = ThreadPool::instance();
-	std::cout << "m is " << &m1 << std::endl;
-	std::cout << "j is " << &j << std::endl;
 
-	int m = 0;
-	ThreadPool::instance().commit([](int& m) {
-		m = 1024;
-		std::cout << "inner set m is " << m << std::endl;
-		}, m);
-
-	std::this_thread::sleep_for(std::chrono::seconds(3));
-	std::cout << "m is " << m << std::endl;
-
-	std::this_thread::sleep_for(std::chrono::seconds(3));
-	ThreadPool::instance().commit([](int& m) {
-		m = 1024;
-		std::cout << "inner set m is " << m << std::endl;
-		}, std::ref(m));
-	std::this_thread::sleep_for(std::chrono::seconds(3));
-	std::cout << "m is " << m << std::endl;
+	//use_threadpool_1();
+	// m修改失败
+	//use_threadpool_2();
+	// m修改成功
+	use_threadpool_3(); 
 
 	return 1;
 }

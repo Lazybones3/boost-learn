@@ -5,6 +5,7 @@
 #include "join_thread.h"
 #include "FutureThreadPool.h"
 
+// 利用条件变量等待
 class notify_thread_pool
 {
 private:

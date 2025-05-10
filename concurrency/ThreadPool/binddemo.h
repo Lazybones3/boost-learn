@@ -55,6 +55,7 @@ std::future<int> commit(F&& f, Args&&... args) {
 	return std::future<int>();
 }
 
+// 只要出现了左值引用最后折叠的结果都是左值引用，只有右值引用和右值引用折叠才能变成右值引用。
 void reference_collapsing(){
 	int a = 3;
 	commit(functionint, a);
@@ -71,6 +72,8 @@ void use_rightref(int && rparam) {
 
 template<typename T>
 void use_tempref(T&& tparam) {
+	// tparam被折叠成int&&，但是传递给use_rightref时会被当做左值来使用，所以下面这行代码会报编译错误
+	// use_rightref(tparam);
 	use_rightref(std::forward<T>(tparam));
 }
 

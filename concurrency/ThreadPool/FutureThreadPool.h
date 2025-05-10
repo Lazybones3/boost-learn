@@ -8,6 +8,7 @@ class function_wrapper
 {
 	struct impl_base {
 		virtual void call() = 0;
+		// 虚析构：当调用析构函数时会去调用子类实现的析构函数
 		virtual ~impl_base() {}
 	};
 	std::unique_ptr<impl_base> impl;
@@ -73,8 +74,9 @@ public:
 		}
 	}
 
+	// typename std::result_of<FunctionType()>::type中的typename用于显式指定后面std::result_of<FunctionType()>::type是一个类型
 	template<typename FunctionType>
-	std::future<typename std::result_of<FunctionType()>::type>   
+	std::future<typename std::result_of<FunctionType()>::type>
 		submit(FunctionType f)
 	{
 		typedef typename std::result_of<FunctionType()>::type result_type;   

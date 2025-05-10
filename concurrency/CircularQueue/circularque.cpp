@@ -5,7 +5,7 @@
 #include "CircularQueLight.h"
 #include "CircularQueSync.h"
 
-
+// 基于锁实现环形队列
 void TestCircularQue() {
     //最大容量为10
     CircularQueLk<MyClass, 5> cq_lk;

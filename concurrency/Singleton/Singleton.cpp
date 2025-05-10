@@ -122,8 +122,8 @@ void test_singlelazy()
 	//何时释放new的对象？造成内存泄漏
 }
 
-//可以利用智能指针完成自动回收
 
+//可以利用智能指针完成自动回收
 class SingleAuto
 {
 private:
@@ -171,9 +171,9 @@ void test_singleauto()
 	// delete sp1.get();
 }
 
+
 //为了规避用户手动释放内存，可以提供一个辅助类帮忙回收内存
 //并将单例类的析构函数写为私有
-
 class SingleAutoSafe;
 class SafeDeletor
 {

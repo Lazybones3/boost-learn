@@ -33,18 +33,23 @@ int main()
 		case '9':
 			atmqueue.send(digit_pressed(c));
 			break;
+		// 显示余额
 		case 'b':
 			atmqueue.send(balance_pressed());
 			break;
+		// 取钱
 		case 'w':
 			atmqueue.send(withdraw_pressed(50));
 			break;
+		// 取消
 		case 'c':
 			atmqueue.send(cancel_pressed());
 			break;
+		// 退出
 		case 'q':
 			quit_pressed = true;
 			break;
+		// 插卡
 		case 'i':
 			atmqueue.send(card_inserted("acc1234"));
 			break;
