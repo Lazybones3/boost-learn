@@ -30,11 +30,13 @@ void dangerous_use() {
 	//5  转移t2管理的线程给t3
 	t3 = std::move(t2);
 	//6  转移t3管理的线程给t1
+	// 对t1重新赋值会强制终止上面绑定some_other_function的线程，造成程序崩溃
 	t1 = std::move(t3);
 	std::this_thread::sleep_for(std::chrono::seconds(2000));
 }
 
 std::thread  f() {
+	// 这里返回的时候发现thread没有拷贝构造函数，就会触发移动构造函数
     return std::thread(some_function);
 }
 
@@ -46,8 +48,9 @@ void param_function(int a) {
 }
 
 std::thread g() {
-     std::thread t(param_function, 43);
-     return t;
+	// 这里返回t的时候发现thread没有拷贝构造函数，就触发移动构造函数
+    std::thread t(param_function, 43);
+    return t;
 }
 
 class joining_thread {
@@ -152,6 +155,9 @@ void use_jointhread() {
 void use_vector() {
     std::vector<std::thread> threads;
     for (unsigned i = 0; i < 10; ++i) {
+		// emplace_back直接调用thread的构造函数，避免了拷贝构造的开销，等价于：
+		// auto t = std::thread(param_function, i);
+		// threads.push_back(std::move(t));  // 如果实现的拷贝构造，这里move还是会调用拷贝构造
         threads.emplace_back(param_function, i);
     }
 
@@ -169,13 +175,14 @@ struct accumulate_block
 		result = std::accumulate(first, last, result);
 	}
 };
+
 template<typename Iterator, typename T>
 T parallel_accumulate(Iterator first, Iterator last, T init)
 {
 	unsigned long const length = std::distance(first, last);
 	if (!length)
 		return init;    //⇽-- - ①
-		unsigned long const min_per_thread = 25;
+	unsigned long const min_per_thread = 25;
 	unsigned long const max_threads =
 		(length + min_per_thread - 1) / min_per_thread;    //⇽-- - ②
 		unsigned long const hardware_threads =
@@ -190,17 +197,17 @@ T parallel_accumulate(Iterator first, Iterator last, T init)
 	{
 		Iterator block_end = block_start;
 		std::advance(block_end, block_size);    //⇽-- - ⑥
-			threads[i] = std::thread(//⇽-- - ⑦
-				accumulate_block<Iterator, T>(),
-				block_start, block_end, std::ref(results[i]));
+		threads[i] = std::thread(//⇽-- - ⑦
+			accumulate_block<Iterator, T>(),
+			block_start, block_end, std::ref(results[i]));
 		block_start = block_end;    //⇽-- - ⑧
 	}
 	accumulate_block<Iterator, T>()(
 		block_start, last, results[num_threads - 1]);    //⇽-- - ⑨
 
-		for (auto& entry : threads)
-			entry.join();    //⇽-- - ⑩
-			return std::accumulate(results.begin(), results.end(), init);    //⇽-- - ⑪
+	for (auto& entry : threads)
+		entry.join();    //⇽-- - ⑩
+		return std::accumulate(results.begin(), results.end(), init);    //⇽-- - ⑪
 }
 
 void use_parallel_acc() {
@@ -217,9 +224,9 @@ void use_parallel_acc() {
 
 
 int main() {
-	//dangerous_use();
-   // use_jointhread();
-    //use_vector();
-   use_parallel_acc();
+	// dangerous_use();
+    // use_jointhread();
+    // use_vector();
+   	use_parallel_acc();
     std::this_thread::sleep_for(std::chrono::seconds(1));
 }

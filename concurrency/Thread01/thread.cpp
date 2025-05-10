@@ -19,6 +19,7 @@ public:
 struct func {
     int& _i;
     func(int & i): _i(i){}
+    // 重载括号运算符实现仿函数
     void operator()() {
         for (int i = 0; i < 3; i++) {
             _i = i;
