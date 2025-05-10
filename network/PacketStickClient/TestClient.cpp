@@ -11,7 +11,7 @@ int main()
 		//创建上下文服务
 		boost::asio::io_context   ioc;
 		//构造endpoint
-		tcp::endpoint  remote_ep(address::from_string("127.0.0.1"), 10086);
+		tcp::endpoint  remote_ep(make_address("127.0.0.1"), 10086);
 		tcp::socket  sock(ioc);
 		boost::system::error_code   error = boost::asio::error::host_not_found; ;
 		sock.connect(remote_ep, error);

@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.22)
 project(BoostLearn)
 
+list(APPEND CMAKE_PREFIX_PATH $ENV{THIRD_PARTY_DIR})
+
 #add_subdirectory(network/SyncClient)
 #add_subdirectory(network/SyncServer)
 #add_subdirectory(network/AsyncServer01)
