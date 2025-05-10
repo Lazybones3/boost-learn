@@ -20,9 +20,9 @@ def send_work(sock):
         sock.sendall(send_data)
 
 def recv_work(sock):
+    print("begin to receive...")
     while True:
         time.sleep(0.002)  # 2 milliseconds
-        print("begin to receive...")
 
         # 读取消息ID
         reply_id = sock.recv(HEAD_ID_LEN)
