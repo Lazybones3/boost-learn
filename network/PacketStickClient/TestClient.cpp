@@ -13,7 +13,7 @@ int main()
 		//构造endpoint
 		tcp::endpoint  remote_ep(make_address("127.0.0.1"), 10086);
 		tcp::socket  sock(ioc);
-		boost::system::error_code   error = boost::asio::error::host_not_found; ;
+		boost::system::error_code   error = boost::asio::error::host_not_found;
 		sock.connect(remote_ep, error);
 		if (error) {
 			cout << "connect failed, code is " << error.value() << " error msg is " << error.message();
