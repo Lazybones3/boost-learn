@@ -12,17 +12,18 @@ using namespace boost::asio::ip;
 
 class MyClient {
 public:
-    MyClient(boost::asio::io_context& ioc, std::string host, short port);
+    MyClient(std::string host, short port);
 
     void connect();
 
     std::string readMessage();
 
-    void writeMessage(const std::string &msg);
+    void writeMessage(std::string msg);
+
 private:
     std::string _host;
     short _port;
-    boost::asio::io_context &_ioc;
+    boost::asio::io_context _ioc;
     tcp::socket _sock;
 };
 

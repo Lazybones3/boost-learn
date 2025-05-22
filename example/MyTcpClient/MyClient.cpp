@@ -2,7 +2,7 @@
 
 #include <utility>
 
-MyClient::MyClient(boost::asio::io_context& ioc, std::string host, short port) : _ioc(ioc), _host(std::move(host)), _port(port), _sock(_ioc) {}
+MyClient::MyClient(std::string host, short port) : _host(std::move(host)), _port(port), _sock(_ioc) {}
 
 void MyClient::connect() {
     tcp::endpoint remote_ep(make_address(_host), _port);
@@ -34,7 +34,7 @@ std::string MyClient::readMessage() {
     return std::string{msg, static_cast<size_t>(host_msg_len)};
 }
 
-void MyClient::writeMessage(const std::string &msg) {
+void MyClient::writeMessage(std::string msg) {
     const char* request = msg.data();
     short request_id = 1001;
     size_t request_length = strlen(request);
