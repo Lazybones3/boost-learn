@@ -35,6 +35,7 @@ std::string MyClient::readMessage() {
 }
 
 void MyClient::writeMessage(std::string msg) {
+    std::lock_guard<std::mutex> lock(_mutex);
     const char* request = msg.data();
     short request_id = 1001;
     size_t request_length = strlen(request);

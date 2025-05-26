@@ -3,6 +3,7 @@
 
 #include <boost/asio.hpp>
 #include <iostream>
+#include <mutex>
 
 using namespace boost::asio::ip;
 #define MAX_LENGTH (1024*2)
@@ -25,6 +26,7 @@ private:
     short _port;
     boost::asio::io_context _ioc;
     tcp::socket _sock;
+    std::mutex _mutex;
 };
 
 
